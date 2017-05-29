@@ -5,11 +5,11 @@ class Player(models.Model):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     trueskill_date_time = models.DateTimeField()
-    trueskill_sigma = models.FloatField()
-    trueskill_gamma = models.FloatField()
+    trueskill_mu = models.FloatField(default=25.000)
+    trueskill_sigma = models.FloatField(default=8.333)
 
     def __str__(self):
-        return('%s %s (%f)' % (self.first_name, self.last_name, self.trueskill()))
+        return('%s %s (%f)' % (self.first_name, self.last_name, self.trueskill_mu))
     
 class GameResult(models.Model):
     winner_front = models.ForeignKey(Player, related_name='winner_front_game_results')

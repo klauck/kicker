@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import GameResult, Player
 
-# Register your models here.
+admin.site.register(GameResult)
+admin.site.register(Player)
