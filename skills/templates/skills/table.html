@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}EPIC Trueskills{% endblock%}
+
+{% block content %}
+These are the EPIC Trueskills: {{ table|length }} players
+<h2>EPIC Trueskills</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Games</th>
+      <th>Points</th>
+      <th>Trueskills</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for player in table%}
+    <tr>
+      <td>{{ player.name }}</td>
+      <td>{{ player.num_games }}</td>
+      <td>{{ player.points }}</td>
+      <td>{{ player.trueskill|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

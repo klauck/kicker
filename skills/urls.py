@@ -17,5 +17,5 @@ from django.conf.urls import url
 from skills import views
 
 urlpatterns = [
-    url(r'^$', views.trueskills),
+    url(r'^$', views.table, name='table'),
 ]

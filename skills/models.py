@@ -9,7 +9,13 @@ class Player(models.Model):
     trueskill_sigma = models.FloatField(default=8.333)
 
     def __str__(self):
-        return('%s %s (%f)' % (self.first_name, self.last_name, self.trueskill_mu))
+        return ('%s %s (%f)' % (self.first_name, self.last_name, self.trueskill_mu))
+
+    def name(self):
+        return ('%s %s' % (self.first_name, self.last_name))
+
+    def initials(self):
+        return self.first_name[0] + self.last_name[0]
     
 class GameResult(models.Model):
     winner_front = models.ForeignKey(Player, related_name='winner_front_game_results')
@@ -19,3 +25,7 @@ class GameResult(models.Model):
     # winner score is always 6
     loser_score = models.IntegerField()
     date_time = models.DateTimeField()
+
+    def __str__(self):
+        return ('%s, %s : %s, %s    6:%d' % (self.winner_front.initials(), self.winner_back.initials(), \
+                self.loser_front.initials(), self.loser_back.initials(), self.loser_score))

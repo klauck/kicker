@@ -47,8 +47,13 @@ def update_trueskills():
         loser_back.trueskill_date_time = result.date_time
         loser_back.save()
 
-def trueskills(request):
-    update_trueskills()
-    players = Player.objects.all()
-    return HttpResponse("These are the EPIC Trueskills: %d players" % len(players))
 
+def table(request):
+    update_trueskills()
+    table = []
+    for player in Player.objects.order_by('-trueskill_mu'):
+        won_games = len(player.winner_front_game_results.all()) + len(player.winner_back_game_results.all())
+        lost_games =len(player.loser_front_game_results.all()) + len(player.loser_back_game_results.all())
+        table.append({'name': player.name(), 'num_games': won_games + lost_games, \
+                'points': '%d:%d' % (won_games, lost_games), 'trueskill': player.trueskill_mu})
+    return render(request, 'skills/table.html', context={'table': table})
