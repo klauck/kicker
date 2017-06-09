@@ -3,7 +3,6 @@
 {% block title %}EPIC Trueskills{% endblock%}
 
 {% block content %}
-These are the EPIC Trueskills: {{ table|length }} players
 <h2>EPIC Trueskills</h2>
 <table class="table">
   <thead>
@@ -25,4 +24,5 @@ These are the EPIC Trueskills: {{ table|length }} players
     {% endfor %}
   </tbody>
 </table>
+<a href="{% url 'admin:skills_gameresult_add' %}">Add game result</a>
 {% endblock %}
