@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Create your models here.
 class Player(models.Model):
@@ -23,7 +24,7 @@ class GameResult(models.Model):
     loser_front = models.ForeignKey(Player, related_name='loser_front_game_results')
     loser_back = models.ForeignKey(Player, related_name='loser_back_game_results')
     # winner score is always 6
-    loser_score = models.IntegerField()
+    loser_score = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     date_time = models.DateTimeField()
 
     def __str__(self):
