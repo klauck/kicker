@@ -20,4 +20,5 @@ import skills
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^skills/', include('skills.urls')),
+    url(r'^', include('skills.urls')),
 ]
