@@ -17,6 +17,9 @@ class Player(models.Model):
 
     def initials(self):
         return self.first_name[0] + self.last_name[0]
+
+    def change(self, old_mu):
+        return ('%s %s (%.2f (%+.2f))' % (self.first_name, self.last_name, self.trueskill_mu, self.trueskill_mu - old_mu))
     
 class GameResult(models.Model):
     winner_front = models.ForeignKey(Player, related_name='winner_front_game_results')

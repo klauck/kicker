@@ -5,6 +5,51 @@ from skills.models import GameResult, Player
 import trueskill
 
 
+def recalc_trueskills():
+    players = Player.objects.all()
+    for player in players:
+        player.trueskill_mu = 25.000
+        player.trueskill_sigma = 8.333
+    players_dict = {p.id: p for p in players}
+    game_results = GameResult.objects.order_by('date_time')
+    for result in game_results:
+        winner_front = players_dict[result.winner_front.id]
+        winner_back = players_dict[result.winner_back.id]
+        loser_front = players_dict[result.loser_front.id]
+        loser_back = players_dict[result.loser_back.id]
+
+        winner_front_rating = trueskill.Rating(mu=winner_front.trueskill_mu, sigma=winner_front.trueskill_sigma)
+        winner_back_rating = trueskill.Rating(mu=winner_back.trueskill_mu, sigma=winner_back.trueskill_sigma)
+        loser_front_rating = trueskill.Rating(mu=loser_front.trueskill_mu, sigma=loser_front.trueskill_sigma)
+        loser_back_rating = trueskill.Rating(mu=loser_back.trueskill_mu, sigma=loser_back.trueskill_sigma)
+
+        (new_winner_front_rating, new_winner_back_rating), (new_loser_front_rating, new_loser_back_rating) = \
+            trueskill.rate([[winner_front_rating, winner_back_rating], [loser_front_rating, loser_back_rating]], ranks=[0, 1])
+
+        winner_front.trueskill_mu = new_winner_front_rating.mu
+        winner_front.trueskill_sigma = new_winner_front_rating.sigma
+        winner_front.trueskill_date_time = result.date_time
+
+        winner_back.trueskill_mu = new_winner_back_rating.mu
+        winner_back.trueskill_sigma = new_winner_back_rating.sigma
+        winner_back.trueskill_date_time = result.date_time
+
+        loser_front.trueskill_mu = new_loser_front_rating.mu
+        loser_front.trueskill_sigma = new_loser_front_rating.sigma
+        loser_front.trueskill_date_time = result.date_time
+
+        loser_back.trueskill_mu = new_loser_back_rating.mu
+        loser_back.trueskill_sigma = new_loser_back_rating.sigma
+        loser_back.trueskill_date_time = result.date_time
+
+        print("%s, %s  :  %s, %s    6:%d" % (winner_front.change(winner_front_rating.mu), winner_back.change(winner_back_rating.mu), \
+                loser_front.change(loser_front_rating.mu), loser_back.change(loser_back_rating.mu), result.loser_score))
+
+
+
+    for p_id in players_dict:
+        print(players_dict[p_id])
+
 def update_trueskills():
     last_update = Player.objects.aggregate(Max('trueskill_date_time'))['trueskill_date_time__max']
     print(last_update)
