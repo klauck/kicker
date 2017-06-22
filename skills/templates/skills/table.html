@@ -11,6 +11,7 @@
       <th>Games</th>
       <th>Points</th>
       <th>Trueskills</th>
+      <th>Sigma</th>
     </tr>
   </thead>
   <tbody>
@@ -20,6 +21,7 @@
       <td>{{ player.num_games }}</td>
       <td>{{ player.points }}</td>
       <td>{{ player.trueskill|floatformat:2 }}</td>
+      <td>{{ player.sigma|floatformat:2 }}</td>
     </tr>
     {% endfor %}
   </tbody>
