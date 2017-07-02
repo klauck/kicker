@@ -100,5 +100,6 @@ def table(request):
         won_games = len(player.winner_front_game_results.all()) + len(player.winner_back_game_results.all())
         lost_games =len(player.loser_front_game_results.all()) + len(player.loser_back_game_results.all())
         table.append({'name': player.name(), 'num_games': won_games + lost_games, \
-                'points': '%d:%d' % (won_games, lost_games), 'trueskill': player.trueskill_mu, 'sigma': player.trueskill_sigma})
+                'points': '%d:%d' % (won_games, lost_games), 'mu': player.trueskill_mu, 'sigma': player.trueskill_sigma, \
+                'rank': player.trueskill_mu - 3 * player.trueskill_sigma})
     return render(request, 'skills/table.html', context={'table': table})
