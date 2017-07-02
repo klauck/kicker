@@ -29,4 +29,30 @@
   </tbody>
 </table>
 <a href="{% url 'admin:skills_gameresult_add' %}">Add game result</a>
+
+<h3>Latest Games</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Winner Front</th>
+      <th>Winner Back</th>
+      <th>Loser Front</th>
+      <th>Loser Back</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for game in latest_games %}
+    <tr>
+      <td>{{ game.date|date:"d.m.Y" }}</td>
+      <td>{{ game.winner_front }}</td>
+      <td>{{ game.winner_back }}</td>
+      <td>{{ game.loser_front }}</td>
+      <td>{{ game.loser_back }}</td>
+      <td>{{ game.result }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

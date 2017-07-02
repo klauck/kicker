@@ -12,6 +12,8 @@ def recalc_trueskills():
         player.trueskill_sigma = 8.333
     players_dict = {p.id: p for p in players}
     game_results = GameResult.objects.order_by('date_time')
+
+    latest_games = []
     for result in game_results:
         winner_front = players_dict[result.winner_front.id]
         winner_back = players_dict[result.winner_back.id]
@@ -42,22 +44,18 @@ def recalc_trueskills():
         loser_back.trueskill_sigma = new_loser_back_rating.sigma
         loser_back.trueskill_date_time = result.date_time
 
-        print("%s, %s  :  %s, %s    6:%d" % (winner_front.change(winner_front_rating.mu), winner_back.change(winner_back_rating.mu), \
-                loser_front.change(loser_front_rating.mu), loser_back.change(loser_back_rating.mu), result.loser_score))
+        latest_games.append({'winner_front': winner_front.change(winner_front_rating.mu), 'winner_back': winner_back.change(winner_back_rating.mu), \
+                'loser_front': loser_front.change(loser_front_rating.mu), 'loser_back': loser_back.change(loser_back_rating.mu), \
+                'result': '6:%d' % result.loser_score, 'date': result.date_time})
+    return latest_games
 
-
-
-    for p_id in players_dict:
-        print(players_dict[p_id])
 
 def update_trueskills():
     last_update = Player.objects.aggregate(Max('trueskill_date_time'))['trueskill_date_time__max']
-    print(last_update)
     if last_update:
         new_game_results = GameResult.objects.filter(date_time__gt=last_update).order_by('date_time')
     else:
         new_game_results = GameResult.objects.order_by('date_time')
-    print(new_game_results)
     for result in new_game_results:
         winner_front = result.winner_front
         winner_back = result.winner_back
@@ -102,4 +100,7 @@ def table(request):
         table.append({'name': player.name(), 'num_games': won_games + lost_games, \
                 'points': '%d:%d' % (won_games, lost_games), 'mu': player.trueskill_mu, 'sigma': player.trueskill_sigma, \
                 'rank': player.trueskill_mu - 3 * player.trueskill_sigma})
-    return render(request, 'skills/table.html', context={'table': table})
+    latest_games = recalc_trueskills()
+    if len(latest_games) > 10:
+        latest_games = latest_games[-10:]
+    return render(request, 'skills/table.html', context={'table': table, 'latest_games': latest_games[::-1]})
