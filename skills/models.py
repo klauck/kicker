@@ -5,12 +5,9 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 class Player(models.Model):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
-    trueskill_date_time = models.DateTimeField()
-    trueskill_mu = models.FloatField(default=25.000)
-    trueskill_sigma = models.FloatField(default=8.333)
 
     def __str__(self):
-        return ('%s %s (%f)' % (self.first_name, self.last_name, self.trueskill_mu))
+        return ('%s %s' % (self.first_name, self.last_name))
 
     def name(self):
         return ('%s %s' % (self.first_name, self.last_name))
