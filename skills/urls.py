@@ -18,4 +18,5 @@ from skills import views
 
 urlpatterns = [
     url(r'^$', views.table, name='table'),
+    url(r'^player/(?P<player_id>[0-9]+)$', views.player, name='player'),
 ]

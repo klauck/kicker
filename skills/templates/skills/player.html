@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}EPIC Trueskills{% endblock%}
+
+{% block content %}
+<h2>{{ name }}</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Partner</th>
+      <th>Games</th>
+      <th>Points if partner is back</th>
+      <th>Points if partner is front</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for partner in table %}
+    <tr>
+      <td><a href="{% url 'player' player_id=partner.id %}">{{ partner.name }}</a></td>
+      <td>{{ partner.num_games }}</td>
+      <td>{{ partner.points_front }}</td>
+      <td>{{ partner.points_back }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<a href="{% url 'table' %}">Back to main page</a>
+
+{% endblock %}
