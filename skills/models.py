@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Player(models.Model):
@@ -30,3 +31,11 @@ class GameResult(models.Model):
     def __str__(self):
         return ('%s, %s : %s, %s    6:%d' % (self.winner_front.initials(), self.winner_back.initials(), \
                 self.loser_front.initials(), self.loser_back.initials(), self.loser_score))
+
+    def clean(self):
+        if self.winner_front == self.winner_back or self.loser_front == self.loser_back:
+            raise ValidationError('Players may not play with themselfes.')
+
+        if self.winner_front == self.loser_front or self.winner_front == self.loser_back or \
+                self.winner_back == self.loser_front or self.winner_back == self.loser_back:
+            raise ValidationError('Players may not play against themselfes.')
