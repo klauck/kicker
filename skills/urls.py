@@ -17,6 +17,7 @@ from django.conf.urls import url
 from skills import views
 
 urlpatterns = [
-    url(r'^$', views.table, name='table'),
-    url(r'^player/(?P<player_id>[0-9]+)$', views.player, name='player'),
+    url(r'^$', views.current_season, name='current_season'),
+    url(r'^table/(?P<begin_date_str>\d{4}-\d{2}-\d{2})/(?P<end_date_str>\d{4}-\d{2}-\d{2})$', views.table, name='table'),
+    url(r'^player/(?P<player_id>[0-9]+)/(?P<begin_date_str>\d{4}-\d{2}-\d{2})/(?P<end_date_str>\d{4}-\d{2}-\d{2})$', views.player, name='player'),
 ]

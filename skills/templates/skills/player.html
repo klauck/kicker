@@ -16,7 +16,7 @@
   <tbody>
     {% for partner in table %}
     <tr>
-      <td><a href="{% url 'player' player_id=partner.id %}">{{ partner.name }}</a></td>
+      <td><a href="{% url 'player' player_id=partner.id begin_date_str=begin_date_str end_date_str=end_date_str %}">{{ partner.name }}</a></td>
       <td>{{ partner.num_games }}</td>
       <td>{{ partner.points_front }}</td>
       <td>{{ partner.points_back }}</td>
@@ -24,6 +24,6 @@
     {% endfor %}
   </tbody>
 </table>
-<a href="{% url 'table' %}">Back to main page</a>
+<a href="{% url 'table' begin_date_str=begin_date_str end_date_str=end_date_str %}">Back to main page</a>
 
 {% endblock %}

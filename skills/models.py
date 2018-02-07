@@ -39,3 +39,14 @@ class GameResult(models.Model):
         if self.winner_front == self.loser_front or self.winner_front == self.loser_back or \
                 self.winner_back == self.loser_front or self.winner_back == self.loser_back:
             raise ValidationError('Players may not play against themselfes.')
+
+class Season(models.Model):
+    begin = models.DateField()
+    end = models.DateField()
+
+    def __str__(self):
+        return 'Season %s - %s' % (self.begin, self.end)
+
+    def clean(self):
+        if self.begin > self.end:
+            raise ValidationError('Begin date must be equal or smaller than end date.')

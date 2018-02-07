@@ -1,14 +1,14 @@
-from django.db.models import Max, Count
-from django.shortcuts import render
+from django.db.models import Count, Min
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from skills.models import GameResult, Player
+from skills.models import GameResult, Player, Season
+import datetime
 import trueskill
 
 
-def recalculate_trueskills():
+def recalculate_trueskills(game_results):
     players = Player.objects.all()
     players_ratings = {p.id: trueskill.Rating(mu=25.000, sigma=8.333) for p in players}
-    game_results = GameResult.objects.order_by('date_time')
 
     latest_games = []
     for result in game_results:
@@ -39,29 +39,52 @@ def recalculate_trueskills():
 
     return latest_games, players_ratings
 
+def current_season(request):
+    today = datetime.datetime.today().date()
+    current_seasons = Season.objects.filter(begin__lte=today, end__gte=today)
+    if len(current_seasons) == 1:
+        return redirect('table', begin_date_str=str(current_seasons[0].begin), end_date_str=str(today))
+    first_game_date = GameResult.objects.aggregate(Min('date_time'))
+    return redirect('table', begin_date_str=str(first_game_date['date_time__min'].date()), end_date_str=str(today))
 
-def table(request):
-    latest_games, players_ratings = recalculate_trueskills()
+
+
+def table(request, begin_date_str, end_date_str):
+    begin_date = datetime.datetime.strptime(begin_date_str, "%Y-%m-%d").date()
+    end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    date_time_filter = {'date_time__date__gte': begin_date, 'date_time__date__lte': end_date}
+
+    game_results = GameResult.objects.filter(**date_time_filter).order_by('date_time')
+    latest_games, players_ratings = recalculate_trueskills(game_results)
     table = []
     for player in Player.objects.all():
         rating = players_ratings[player.id]
-        won_games = len(player.winner_front_game_results.all()) + len(player.winner_back_game_results.all())
-        lost_games =len(player.loser_front_game_results.all()) + len(player.loser_back_game_results.all())
+        won_games = len(player.winner_front_game_results.filter(**date_time_filter)) \
+                + len(player.winner_back_game_results.filter(**date_time_filter))
+        lost_games = len(player.loser_front_game_results.filter(**date_time_filter)) \
+                + len(player.loser_back_game_results.filter(**date_time_filter))
+        if won_games == 0 and lost_games ==0:
+            continue
         table.append({'name': player.name(), 'id': player.pk, 'num_games': won_games + lost_games, \
                 'points': '%d:%d' % (won_games, lost_games), 'mu': rating.mu, 'sigma': rating.sigma, \
                 'rank': rating.mu - 3 * rating.sigma})
     if len(latest_games) > 10:
         latest_games = latest_games[-10:]
-    return render(request, 'skills/table.html', context={'table': sorted(table, key=lambda k: -k['mu']), 'latest_games': latest_games[::-1]})
+    return render(request, 'skills/table.html', context={'begin_date_str': begin_date_str, 'end_date_str': end_date_str,
+        'table': sorted(table, key=lambda k: -k['mu']), 'latest_games': latest_games[::-1]})
 
 
-def player(request, player_id):
+def player(request, player_id, begin_date_str, end_date_str):
+    begin_date = datetime.datetime.strptime(begin_date_str, "%Y-%m-%d").date()
+    end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    date_time_filter = {'date_time__date__gte': begin_date, 'date_time__date__lte': end_date}
+
     player = Player.objects.get(pk=int(player_id))
 
-    winner_front_partners = player.winner_front_game_results.all().values('winner_back').annotate(Count('winner_back'))
-    winner_back_partners = player.winner_back_game_results.all().values('winner_front').annotate(Count('winner_front'))
-    loser_front_partners = player.loser_front_game_results.all().values('loser_back').annotate(Count('loser_back'))
-    loser_back_partners = player.loser_back_game_results.all().values('loser_front').annotate(Count('loser_front'))
+    winner_front_partners = player.winner_front_game_results.filter(**date_time_filter).values('winner_back').annotate(Count('winner_back'))
+    winner_back_partners = player.winner_back_game_results.filter(**date_time_filter).values('winner_front').annotate(Count('winner_front'))
+    loser_front_partners = player.loser_front_game_results.filter(**date_time_filter).values('loser_back').annotate(Count('loser_back'))
+    loser_back_partners = player.loser_back_game_results.filter(**date_time_filter).values('loser_front').annotate(Count('loser_front'))
 
     player_partners = {}
     for partner in winner_front_partners:
@@ -94,4 +117,5 @@ def player(request, player_id):
                 'points_front': '%d:%d' % (player_partners[partner][0], player_partners[partner][2]),
                 'points_back': '%d:%d' % (player_partners[partner][1], player_partners[partner][3])})
 
-    return render(request, 'skills/player.html', context={'table': sorted(table, key=lambda k: -k['num_games']), 'name': player.name()})
+    return render(request, 'skills/player.html', context={'begin_date_str': begin_date_str, 'end_date_str': end_date_str,
+        'table': sorted(table, key=lambda k: -k['num_games']), 'name': player.name()})
